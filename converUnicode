@@ -1,0 +1,42 @@
+import Foundation
+
+func unicodeDecode(_ str: String) -> String {
+    let wI = NSMutableString(string: str)
+    CFStringTransform(wI, nil, "Any-Hex/Java" as NSString, true)
+    return wI as String
+}
+
+func extractStrings(string:String, start: Int, length: Int) -> String {
+    // 0番目の要素を定義
+    let zero = string.startIndex
+    // 取り出す先頭の文字を指定
+    let startCharacterIndex = string.index(zero, offsetBy: start)
+    // 取り出す先頭の文字から何文字先まで取り出すか指定(実際に取り出したい文字+1になる)
+    let nextToEndCharacterIndex = string.index(startCharacterIndex, offsetBy: length)
+    // nextToEndCharacterIndexを含むと範囲からはみ出るためnextToEndCharacterIndex未満にする
+    let outputString = string[startCharacterIndex..<nextToEndCharacterIndex]
+    // outputStringはSubstring型のためString型にキャストする
+    return String(outputString)
+}
+
+
+// 使用例
+let originalString = "2024\\U5e7408\\U670802\\U65e506:54 \\U4f5c\\U6210"
+let lowerStr = originalString.lowercased()
+var lines = lowerStr.components(separatedBy: "\\")
+lines.enumerated().forEach { index, str in
+    var num = ""
+    var unicode = ""
+    if str.first == "u" {
+        unicode = extractStrings(string: str, start: 0, length: 5)
+        unicode = "\\" + unicode
+        unicode = (unicodeDecode(String(unicode)))
+        if str.count >= 6 {
+            num = extractStrings(string: str, start: 5, length: str.count - 5)
+        }
+        lines[index] = unicode + num
+        print(lines[index])
+    }
+}
+let str = lines.joined()
+print(str)
